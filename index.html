@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="triviaTrend">
 
 <head>
   <meta charset="utf-8">
@@ -9,72 +9,134 @@
   <link rel="shortcut icon" href="/styles/assets/crownFavicon.png">
 </head>
 
-<body>
+<body ng-controller="mainCtrl">
   <header>
     <div></div>
     <h1>Trivia Trends</h1>
-    <button><span>+</span> Add Question</button>
+    <button ng-click="addingCard = !addingCard">
+      <span>+</span> Add Question</button>
   </header>
   <article>
     <nav>
-      <a>All Questions</a>
-      <a>Easy</a>
-      <a>Medium</a>
-      <a>Hard</a>
-      <a>Search by Animal</a>
+      <a ng-click="getQuestionsAll()">All Questions</a>
+      <a ng-click="filterByDiff(1)">Easy</a>
+      <a ng-click="filterByDiff(2)">Medium</a>
+      <a ng-click="filterByDiff(3)">Hard</a>
+      <a ng-click="searchBy = !searchBy">Search by Animal</a>
     </nav>
-    <div class="search">
-      <input type="text" placeholder="Animal to search by">
+    <div class="search" ng-show="searchBy">
+      <input type="text" placeholder="Animal to search by" ng-model="myFilter.animal">
     </div>
 
     <!-- Questions go here -->
+    <div class="question-wrapper" ng-class="{correct}" ng-repeat="q in questions | filter: myFilter">
+      <!-- <span ng-hide="animal">{{q.animal}}</span> -->
+      <h3>{{q.question}}</h3>
+      <div ng-class="{green: q.difficulty == 1, yellow: q.difficulty == 2, red: q.difficulty == 3}">
+        {{q.difficulty}}</div>
+      <div class="gear">
+        <img ng-click="editCard = !editCard" src="/styles/assets/gear.svg" alt="">
+      </div>
+      <ul>
+        <li ng-class="{chosen: question.chosenAnswer == $index+1}" ng-repeat="o in q.options track by $index">
+          <!-- Repeated for each option -->
+          <input type="radio" name="radio">
+          <label ng-model="q.chosenAnswer" ng-click="testQuestion($index, q.correct_answer)">{{o}}</label>
+        </li>
+      </ul>
+
+      <div class="modalE" ng-show="editCard">
+          <form>
+            <h4 class="close" ng-click="editCard = !editCard">X</h4>
+            <span>Question</span>
+            <input type="text" ng-model="q.question">
+            <span>Animal it's about</span>
+            <input type="text" ng-model="q.animal">
+            <span>Difficulty</span>
+            <div class="range">
+              <input type="range" min="1" max="3" ng-model="q.difficulty">
+      
+              <h5>{{q.difficulty}}</h5>
+            </div>
+            <h4>Options</h4>
+            <div>
+              <input name="options" type="radio" ng-model="q.answer" value="1">
+              <input type="text" ng-model="q.options[1]">
+            </div>
+            <div>
+              <input name="options" type="radio" ng-model="q.answer" value="2">
+              <input type="text" ng-model="q.options[2]">
+            </div>
+            <div>
+              <input name="options" type="radio" ng-model="q.answer" value="3">
+              <input type="text" ng-model="q.options[3]">
+            </div>
+            <div>
+              <input name="options" type="radio" ng-model="q.answer" value="4">
+              <input type="text" ng-model="q.options[4]">
+            </div>
+      
+      
+            <!--Edit & Delete question buttons-->
+            <div class="buttons">
+              <button class="red" ng-click="deleteQuestion(q._id)">Delete Question</button>
+              <button class="green" ng-click="updateQuestion(q._id, q, $index)">Save Changes</button>
+              <button ng-click="editCard = !editCard">Cancel</button>
+            </div>
+      
+          </form>
+        </div>
+
+    </div>
 
   </article>
 
-  <div class="modal">
+  <div class="modal" ng-show="addingCard">
     <form>
-      <h4 class="close">X</h4>
-      <span>Question</span><input type="text" ng-model="<!-- Question -->">
-      <span>Animal it's about</span><input type="text" ng-model="<!-- Animal -->">
+      <h4 class="close" ng-click="addingCard = !addingCard">X</h4>
+      <span>Question</span>
+      <input type="text" ng-model="newQ.Question">
+      <span>Animal it's about</span>
+      <input type="text" ng-model="newQ.Animal">
       <span>Difficulty</span>
       <div class="range">
-        <input type="range" min="1" max="3" ng-model="<!-- Difficulty -->">
+        <input type="range" min="1" max="3" ng-model="newQ.Difficulty">
 
         <h5>{{newQuestion.difficulty}}</h5>
       </div>
       <h4>Options</h4>
       <div>
-        <input type="radio" ng-model="" value="1">
-        <input type="text" ng-model="">
+        <input name="options" type="radio" ng-model="newQ.answer" value="1">
+        <input type="text" ng-model="newQ.option1">
       </div>
       <div>
-        <input type="radio" ng-model="" value="2">
-        <input type="text" ng-model="">
+        <input name="options" type="radio" ng-model="newQ.answer" value="2">
+        <input type="text" ng-model="newQ.option2">
       </div>
       <div>
-        <input type="radio" ng-model="" value="3">
-        <input type="text" ng-model="">
+        <input name="options" type="radio" ng-model="newQ.answer" value="3">
+        <input type="text" ng-model="newQ.option3">
       </div>
       <div>
-        <input type="radio" ng-model="" value="4">
-        <input type="text" ng-model="">
+        <input name="options" type="radio" ng-model="newQ.answer" value="4">
+        <input type="text" ng-model="newQ.option4">
       </div>
 
       <!--Add question buttons-->
       <div class="buttons">
-        <button class="green">Save Question</button>
-        <button>Cancel</button>
+        <button class="green" ng-click="addQuestion(newQ)">Save Question</button>
+        <button ng-click="addingCard = !addingCard">Cancel</button>
       </div>
 
-      <!--Edit & Delete question buttons-->
-      <div class="buttons">
-        <button class="red">Delete Question</button>
-        <button class="green">Save Changes</button>
-        <button>Cancel</button>
-      </div>
+
+
+
 
     </form>
   </div>
+
+  
+
 
 
 
@@ -82,6 +144,11 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js" charset="utf-8"></script>
   <script src="./app.js" charset="utf-8"></script>
+  <script src="./mainCtrl.js"></script>
+  <script src="./mainSrvc.js"></script>
+
+
+
 </body>
 
 </html>
